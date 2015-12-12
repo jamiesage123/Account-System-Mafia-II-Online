@@ -3,6 +3,7 @@
  * by Jamie Sage
  *
 */
+
 /* -------------------------- ACCOUNT SYSTEM CONFIGURATION -------------------------- */
 
 // Create the config variable
@@ -42,6 +43,12 @@ aConfig.serials_must_match 	 	<- 1;
 aConfig.kick_on_wrong_password  <- 1;
 
 /*
+	Spawn At Last Position
+	- Should the server spawnt the client at the last position they were standing when they previously left?
+*/
+aConfig.spawn_at_last_pos  		<- 1;
+
+/*
 	Log Prefix
 	- The log prefix which will be shown next to all console logs in connection with the account system
 */
@@ -51,11 +58,18 @@ aConfig.LOG_PREFIX  <- "[accounts] ";
 	Account Data
 	- These are the variables used when storing information about a specific player
 */
+
+// -- Account Data - Can be referenced in any part of your script -- //
+local accountData = { };
+
 addEventHandler("onPlayerConnect",
 	function(playerid, name, ip, serial)
 	{
 		accountData[playerid] 			 <- { };
 		accountData[playerid].isLoggedIn <- 0;
+		accountData[playerid].posX 		 <- 0.0;
+		accountData[playerid].posY 		 <- 0.0;
+		accountData[playerid].posZ 		 <- 0.0;
 		// Example: accountData[playerid].score <- 0;
 	}
 );
@@ -66,9 +80,6 @@ addEventHandler("onPlayerConnect",
 
 // -- MySQL Handler - Can be referenced in any part of your script -- //
 local mysql_handler;
-
-// -- Account Data - Can be referenced in any part of your script -- //
-local accountData = { };
 
 addEventHandler("onScriptInit",
 	function()
@@ -115,18 +126,22 @@ addEventHandler("onPlayerSpawn",
 			if(accountSys.doesUsernameExist(getPlayerName(playerid)))
 			{
 				// If the account exists, prompt them to login
-				// Print to the console
 				accountSys.print(getPlayerName(playerid) + " has an account.");
 				sendPlayerMessage(playerid, "An account exists with the username '" + getPlayerName(playerid) + "'!", 255, 0, 0);
 				sendPlayerMessage(playerid, "Please login using the /login [password] command.", 255, 0, 0);
+
+				// Set the GUI text
+				triggerClientEvent(playerid, "loginAccount");
 			}
 			else
 			{
 				// If the account doesn't exist, prompt them to register
-				// Print to the console
 				accountSys.print(getPlayerName(playerid) + " doesn't have an account.");
 				sendPlayerMessage(playerid, "An account doesn't exist with the username '" + getPlayerName(playerid) + "'!", 255, 0, 0);
 				sendPlayerMessage(playerid, "Please register using the /register [password] command.", 255, 0, 0);
+
+				// Set the GUI text
+				triggerClientEvent(playerid, "registerAccount");
 			}
 		}
 	}
@@ -135,8 +150,21 @@ addEventHandler("onPlayerSpawn",
 addEventHandler("onPlayerDisconnect",
 	function(playerid, reason)
 	{
+		// Initialise the account system
+	 	local accountSys = AccountSystem();
+
 		// Remove the GUI for the client
 		triggerClientEvent(playerid, "removeLoginGUI");
+
+		// Store the players last position
+		local position = getPlayerPosition(playerid);
+
+		accountData[playerid].posX = position[0];
+		accountData[playerid].posY = position[1];
+		accountData[playerid].posZ = position[2];
+
+		// Save the account
+		accountSys.saveAccount(playerid, getPlayerName(playerid));
 
 		// Remove the clients account data so that data doesn't mix
 		delete accountData[playerid];
@@ -274,6 +302,12 @@ function fnc_loginEvent(playerid, password)
 				// Update the clients serial
 				accountSys.updateSerial(getPlayerName(playerid), getPlayerSerial(playerid));
 			}
+
+			// Load the accounts data
+			accountSys.loadAccount(playerid, getPlayerName(playerid));
+
+			// Spawn the player at their last position
+			if(aConfig.spawn_at_last_pos) setPlayerPosition(playerid, accountData[playerid].posX.tofloat(), accountData[playerid].posY.tofloat(), accountData[playerid].posZ.tofloat());
 		}
 		else
 		{
@@ -569,6 +603,80 @@ class AccountSystem
 
 		// Return the result
 		return mysql_fetch_assoc(query).salt;
+	}
+
+	/**
+	 * AccountSystem.loadAccount
+	 * - This function loads an account from the MySQL database
+	 * @param  int    | The playerid	 
+	 * @param  string | The accounts username
+	 */
+	function loadAccount(playerid, username)
+	{
+		// Escape the string
+		username = mysql_escape_string(mysql_handler, username);
+
+		// Build the query
+		local query  = mysql_query(mysql_handler, "SELECT * FROM `accounts` WHERE `username` = '" + username + "';");
+     	local result = mysql_fetch_assoc(query);
+
+		// Check to see if we have a variable ready to be set (See 'Account Data' config at the top)
+		foreach(ida, aData in result)
+		{
+			if(ida in accountData[playerid])
+			{
+				accountData[playerid][ida] = aData;
+			}
+		}
+
+	    // Free the results
+	    mysql_free_result( query );
+	}
+
+	/**
+	 * AccountSystem.saveAccount
+	 * - This function saves an account (using the data in accountData)
+	 * @param  int    | The playerid
+	 * @param  string | The accounts username
+	 */
+	function saveAccount(playerid, username)
+	{
+		// Print to the console
+		log(aConfig.LOG_PREFIX + "Saving " + username + "'s account...");
+
+		// Escape the string
+		username = mysql_escape_string(mysql_handler, username);
+		
+		// Loop through all the data in accountData
+		foreach(idx, val in accountData[playerid])
+		{
+			// Skip the variables which we don't want to save
+    		if(idx == "isLoggedIn") continue;
+
+	   		// Escape the string
+    		local idx = mysql_escape_string(mysql_handler, idx);
+
+    		// Build the query
+    		local query = mysql_query(mysql_handler, "SHOW COLUMNS FROM `accounts` LIKE '" + idx + "';");
+
+    		// Check to see if the column exists (to prevent errors)
+    		if(mysql_affected_rows(mysql_handler))
+    		{
+    			// Build the query
+    			mysql_query(mysql_handler, "UPDATE `accounts` SET `" + idx + "` = '" + val + "' WHERE `username` = '" + username + "';");
+    		}
+    		else
+    		{
+    			// Print to the console
+    			log(aConfig.LOG_PREFIX + "Failed to save data `" + idx + "` with value '" + val + "' as the column doesn't exist in the database table.");
+    		}
+
+    		// Free the MySQL results
+    		mysql_free_result(query);
+		}
+
+		// Print to the console
+		log(aConfig.LOG_PREFIX + "Successfully saved " + username + "'s account.");
 	}
 
 	/**

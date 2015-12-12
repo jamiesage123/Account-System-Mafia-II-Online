@@ -22,7 +22,7 @@ function getCenterPos(element_width, element_height, result = 1)
 local window = guiCreateElement(0, "Login/Register", getCenterPos(450, 150, 2), getCenterPos(450, 150, 3), 450.0, 125.0);
 local label  = guiCreateElement(6, "Please login or register using the form below.", 8.0, 20.0, 450.0, 25.0, false, window);
 local label2 = guiCreateElement(6, "Password: ", 8.0, 50.0, 450.0, 25.0, false, window);
-local pass   = guiCreateElement(1, "", 70.0, 50.0, 430.0, 25.0, false, window);
+local pass   = guiCreateElement(1, "", 70.0, 50.0, 365.0, 25.0, false, window);
 local login  = guiCreateElement(2, "Login or Register", 8.0, 90.0, 430.0, 25.0, false, window);
 
 addEventHandler("onGuiElementClick",
@@ -40,8 +40,26 @@ addEventHandler("onGuiElementClick",
 	}
 );
 
+addEventHandler("loginAccount", 
+	function()
+	{
+		guiSetText(window, "Login");
+		guiSetText(label,  "An account exists with your username, please login by typing your password into the form below.");
+		guiSetText(login,  "Login");
+	}
+);
+
+addEventHandler("registerAccount", 
+	function()
+	{
+		guiSetText(window, "Register");
+		guiSetText(label,  "Welcome! This account doesn't exist, please enter a password below to register.");
+		guiSetText(login,  "Register");
+	}
+);
+
 addEventHandler("onClientPlayerDisconnect", 
-	function (playerid, nickname)
+	function(playerid, nickname)
 	{
 		// Remove the login GUI
 		callEvent("removeLoginGUI");
@@ -49,7 +67,7 @@ addEventHandler("onClientPlayerDisconnect",
 );
 
 addEventHandler("removeLoginGUI",
-	function ()
+	function()
 	{
 		// Remove the login GUI
 		guiSetVisible(window, false);
@@ -71,7 +89,7 @@ addEventHandler("removeLoginGUI",
 //       Its a little bit buggy, hopefully we can find a way to use it nicely ;)
 
 addEventHandler("fadeScreenIn",
-	function ()
+	function()
 	{
 		// Fade the players screen to black
 		// fadeScreen(500, false);
@@ -82,9 +100,12 @@ addEventHandler("fadeScreenIn",
 );
 
 addEventHandler("fadeScreenOut", 
-	function ()
+	function()
 	{
 		// Fade the players screen back in
 		// fadeScreen(1000, true);
+
+		// Hide the cursor
+		showCursor(false);
 	}
 );
