@@ -613,24 +613,28 @@ class AccountSystem
 	 */
 	function loadAccount(playerid, username)
 	{
-		// Escape the string
-		username = mysql_escape_string(mysql_handler, username);
-
-		// Build the query
-		local query  = mysql_query(mysql_handler, "SELECT * FROM `accounts` WHERE `username` = '" + username + "';");
-     	local result = mysql_fetch_assoc(query);
-
-		// Check to see if we have a variable ready to be set (See 'Account Data' config at the top)
-		foreach(ida, aData in result)
+		// Only load the account if they are logged in
+		if(accountData[playerid].isLoggedIn == 1)
 		{
-			if(ida in accountData[playerid])
-			{
-				accountData[playerid][ida] = aData;
-			}
-		}
+			// Escape the string
+			username = mysql_escape_string(mysql_handler, username);
 
-	    // Free the results
-	    mysql_free_result( query );
+			// Build the query
+			local query  = mysql_query(mysql_handler, "SELECT * FROM `accounts` WHERE `username` = '" + username + "';");
+	     	local result = mysql_fetch_assoc(query);
+
+			// Check to see if we have a variable ready to be set (See 'Account Data' config at the top)
+			foreach(ida, aData in result)
+			{
+				if(ida in accountData[playerid])
+				{
+					accountData[playerid][ida] = aData;
+				}
+			}
+
+		    // Free the results
+		    mysql_free_result( query );
+	    }
 	}
 
 	/**
@@ -641,42 +645,46 @@ class AccountSystem
 	 */
 	function saveAccount(playerid, username)
 	{
-		// Print to the console
-		log(aConfig.LOG_PREFIX + "Saving " + username + "'s account...");
-
-		// Escape the string
-		username = mysql_escape_string(mysql_handler, username);
-		
-		// Loop through all the data in accountData
-		foreach(idx, val in accountData[playerid])
+		// Only save the account if they are logged in
+		if(accountData[playerid].isLoggedIn == 1)
 		{
-			// Skip the variables which we don't want to save
-    		if(idx == "isLoggedIn") continue;
+			// Print to the console
+			log(aConfig.LOG_PREFIX + "Saving " + username + "'s account...");
 
-	   		// Escape the string
-    		local idx = mysql_escape_string(mysql_handler, idx);
+			// Escape the string
+			username = mysql_escape_string(mysql_handler, username);
+			
+			// Loop through all the data in accountData
+			foreach(idx, val in accountData[playerid])
+			{
+				// Skip the variables which we don't want to save
+	    		if(idx == "isLoggedIn") continue;
 
-    		// Build the query
-    		local query = mysql_query(mysql_handler, "SHOW COLUMNS FROM `accounts` LIKE '" + idx + "';");
+		   		// Escape the string
+	    		local idx = mysql_escape_string(mysql_handler, idx);
 
-    		// Check to see if the column exists (to prevent errors)
-    		if(mysql_affected_rows(mysql_handler))
-    		{
-    			// Build the query
-    			mysql_query(mysql_handler, "UPDATE `accounts` SET `" + idx + "` = '" + val + "' WHERE `username` = '" + username + "';");
-    		}
-    		else
-    		{
-    			// Print to the console
-    			log(aConfig.LOG_PREFIX + "Failed to save data `" + idx + "` with value '" + val + "' as the column doesn't exist in the database table.");
-    		}
+	    		// Build the query
+	    		local query = mysql_query(mysql_handler, "SHOW COLUMNS FROM `accounts` LIKE '" + idx + "';");
 
-    		// Free the MySQL results
-    		mysql_free_result(query);
+	    		// Check to see if the column exists (to prevent errors)
+	    		if(mysql_affected_rows(mysql_handler))
+	    		{
+	    			// Build the query
+	    			mysql_query(mysql_handler, "UPDATE `accounts` SET `" + idx + "` = '" + val + "' WHERE `username` = '" + username + "';");
+	    		}
+	    		else
+	    		{
+	    			// Print to the console
+	    			log(aConfig.LOG_PREFIX + "Failed to save data `" + idx + "` with value '" + val + "' as the column doesn't exist in the database table.");
+	    		}
+
+	    		// Free the MySQL results
+	    		mysql_free_result(query);
+			}
+
+			// Print to the console
+			log(aConfig.LOG_PREFIX + "Successfully saved " + username + "'s account.");
 		}
-
-		// Print to the console
-		log(aConfig.LOG_PREFIX + "Successfully saved " + username + "'s account.");
 	}
 
 	/**
