@@ -41,7 +41,7 @@ addEventHandler("onGuiElementClick",
 );
 
 addEventHandler("loginAccount", 
-	function()
+	function(playerid)
 	{
 		guiSetText(window, "Login");
 		guiSetText(label,  "An account exists with your username, please login by typing your password into the form below.");
@@ -50,7 +50,7 @@ addEventHandler("loginAccount",
 );
 
 addEventHandler("registerAccount", 
-	function()
+	function(playerid)
 	{
 		guiSetText(window, "Register");
 		guiSetText(label,  "Welcome! This account doesn't exist, please enter a password below to register.");

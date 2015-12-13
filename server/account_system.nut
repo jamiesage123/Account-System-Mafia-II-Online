@@ -46,7 +46,7 @@ aConfig.kick_on_wrong_password  <- 1;
 	Spawn At Last Position
 	- Should the server spawnt the client at the last position they were standing when they previously left?
 */
-aConfig.spawn_at_last_pos  		<- 1;
+aConfig.spawn_at_last_pos  		<- 0;
 
 /*
 	Log Prefix
@@ -60,17 +60,20 @@ aConfig.LOG_PREFIX  <- "[accounts] ";
 */
 
 // -- Account Data - Can be referenced in any part of your script -- //
-local accountData = { };
+accountData <- { };
 
 addEventHandler("onPlayerConnect",
 	function(playerid, name, ip, serial)
 	{
-		accountData[playerid] 			 <- { };
-		accountData[playerid].isLoggedIn <- 0;
-		accountData[playerid].posX 		 <- 0.0;
-		accountData[playerid].posY 		 <- 0.0;
-		accountData[playerid].posZ 		 <- 0.0;
+		accountData[playerid] 			   <- { };
+		accountData[playerid].isLoggedIn   <- 0;
+		accountData[playerid].posX 		   <- 0.0;
+		accountData[playerid].posY 		   <- 0.0;
+		accountData[playerid].posZ 		   <- 0.0;
 		// Example: accountData[playerid].score <- 0;
+
+		// Call `postPlayerConnect`
+		callEvent("postPlayerConnect", playerid, name, ip, serial);
 	}
 );
 
@@ -150,6 +153,9 @@ addEventHandler("onPlayerSpawn",
 addEventHandler("onPlayerDisconnect",
 	function(playerid, reason)
 	{
+		// Call `prePlayerDisconnect`
+		callEvent("prePlayerDisconnect", playerid, reason);
+
 		// Initialise the account system
 	 	local accountSys = AccountSystem();
 
