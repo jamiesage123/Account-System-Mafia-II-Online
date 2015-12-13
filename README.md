@@ -10,8 +10,11 @@ Mafia II Online - http://www.mafia2-online.com/
 # Credits
 
 Author: Jamie S
+
 Link: http://forum.mafia2-online.com/member.php?action=profile&uid=3
+
 Email: me@jamiesage.co.uk
+
 Web: http://www.jamiesage.co.uk/
 
 # Please Note
