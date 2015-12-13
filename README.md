@@ -7,6 +7,13 @@ Mafia II Online - http://www.mafia2-online.com/
 
 [Account System Wiki](https://github.com/jamiesage123/Account-System-Mafia-II-Online/wiki/)
 
+# Credits
+
+Author: Jamie S
+Link: http://forum.mafia2-online.com/member.php?action=profile&uid=3
+Email: me@jamiesage.co.uk
+Web: http://www.jamiesage.co.uk/
+
 # Please Note
 
 This project has just been started and is not yet complete, there are still many things which I a working on and which need testing.
