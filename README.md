@@ -1,3 +1,6 @@
+# Deprecated
+This code hasn't been uploaded in a long time; will get around to re-doing it at some point but for now I'd call this as deprecated.
+
 # Account-System-Mafia-II-Online
 This is a MySQL account system which can be used in Mafia II Online.
 
@@ -12,8 +15,6 @@ Mafia II Online - http://www.mafia2-online.com/
 Author: Jamie S
 
 Link: http://forum.mafia2-online.com/member.php?action=profile&uid=3
-
-Email: me@jamiesage.co.uk
 
 Web: http://www.jamiesage.co.uk/
 
