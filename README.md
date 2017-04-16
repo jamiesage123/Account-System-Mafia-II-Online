@@ -14,7 +14,7 @@ Mafia II Online - http://www.mafia2-online.com/
 
 Author: Jamie S
 
-Link: http://forum.mafia2-online.com/member.php?action=profile&uid=3
+Link: https://forum.mafia2-online.com/member.php?action=profile&uid=7
 
 Web: http://www.jamiesage.co.uk/
 
