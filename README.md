@@ -1,4 +1,4 @@
-# Deprecated
+# Deprecated - No longer worked on!
 This code hasn't been uploaded in a long time; will get around to re-doing it at some point but for now I'd call this as deprecated.
 
 # Account-System-Mafia-II-Online
